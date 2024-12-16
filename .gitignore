@@ -163,3 +163,5 @@ cython_debug/
 
 # csv files
 **.csv
+
+visem-qc/

@@ -124,6 +124,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venvSCM/
 env/
 venv/
 ENV/
@@ -163,3 +164,6 @@ cython_debug/
 
 # csv files
 **.csv
+
+visem-qc/
+visem-dataset/

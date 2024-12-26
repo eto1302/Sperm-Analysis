@@ -125,6 +125,7 @@ celerybeat.pid
 .env
 .venv
 .venvSCM/
+.venvWAWY/
 env/
 venv/
 ENV/
@@ -167,3 +168,15 @@ cython_debug/
 
 visem-qc/
 visem-dataset/
+data/
+
+# wheels 
+/torch_wheel/
+
+
+# yolo runs except best weights
+/runs/detect/train
+/runs/detect/val**/
+
+# yolo 11 nano pretrained model
+yolo11n.pt

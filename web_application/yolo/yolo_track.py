@@ -8,7 +8,9 @@ from yolo.detector import SpermYOLODetector
 from yolo.tracker import Tracker
 from yolo.motility import calculate_motility_metrics
 
-MODEL_PATH = "../runs/detect/train2/weights/best.pt"
+
+MODEL_PATH = "../experiments/model/best_42_Large3e.pt"
+# MODEL_PATH = "../runs/detect/train2/weights/best.pt"
 VIDEO_PATH = "../../data/shorter_6ms.mp4"
 
 # Set the desired input size for YOLO (640x640)
@@ -19,7 +21,7 @@ DESIRED_FPS = 3  # Slow down to 5 frames per second
 
 class YOLOTrack:
     def __init__(self, qt_track_container):
-        self.detector = SpermYOLODetector(model_path=MODEL_PATH, confidence=0.4)
+        self.detector = SpermYOLODetector(model_path=MODEL_PATH, confidence=0.1)
         self.tracker = Tracker()
 
         self.qt_track_container = qt_track_container

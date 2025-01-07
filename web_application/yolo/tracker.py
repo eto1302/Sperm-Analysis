@@ -4,10 +4,10 @@ from deep_sort_realtime.deepsort_tracker import DeepSort
 class Tracker:
   def __init__(self):
     self.object_tracker = DeepSort(
-      max_age=5,
-      n_init=2,
-      nms_max_overlap=0.5,  # Adjusted for better overlap handling
-      max_cosine_distance=0.8,
+      max_age=8,
+      n_init=10,
+      nms_max_overlap=0.2,  # Adjusted for better overlap handling
+      max_cosine_distance=0.6,
       nn_budget=None,
       override_track_class=None,
       embedder="mobilenet",

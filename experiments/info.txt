@@ -1,0 +1,7 @@
+yolo11n.pt is the checkpoint we used to run the model locally
+
+in runs\detect we have the train information, with the weights subfolder holding the weights of the trained model in that specific training epoch
+
+weights:
+    - last .pt
+    - best .pt

@@ -170,6 +170,14 @@ class VideoModelApp(QMainWindow):
             self.media_player.play()
 
     def track_sperm(self):
+        # Show confirmation dialog
+        proceed = self.show_confirmation_dialog(
+            "Confirmation",
+            "You will see values without a doctor's interpretation. Are you sure you want to proceed?"
+        )
+        if not proceed:
+            return  # Cancel the action if the user selects "No"
+
         # Stop media player if it's playing
         self.media_player.stop()
 
@@ -180,6 +188,14 @@ class VideoModelApp(QMainWindow):
             self.yolo_track.yoloTrack(self.video_path)
 
     def get_prediction(self):
+        # Show confirmation dialog
+        proceed = self.show_confirmation_dialog(
+            "Confirmation",
+            "You will see values without a doctor's interpretation. Are you sure you want to proceed?"
+        )
+        if not proceed:
+            return  # Cancel the action if the user selects "No"
+
         if self.video_path is None:
             QMessageBox.critical(self, "Error", "Please upload a video first")
         else:
@@ -188,3 +204,12 @@ class VideoModelApp(QMainWindow):
                 f"On video {self.video_path} predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
             QMessageBox.information(self, "Success",
                                     f"Model ran successfully on the video and predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
+
+    def show_confirmation_dialog(self, title, message):
+        confirmation = QMessageBox.question(
+            self,
+            title,
+            message,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        return confirmation == QMessageBox.StandardButton.Yes

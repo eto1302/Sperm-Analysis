@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 
+
 class SpermYOLODetector:
     def __init__(self, model_path, confidence):
         self.model = YOLO(model_path)
@@ -30,6 +31,5 @@ class SpermYOLODetector:
 
             conf = box.conf[0]
             detections.append((([x1, y1, w, h]), class_number, conf))
-
 
         return detections

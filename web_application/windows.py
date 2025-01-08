@@ -1,5 +1,5 @@
 import numpy as np
-import torch 
+import torch
 import torch.nn as nn
 
 import sys
@@ -11,7 +11,7 @@ from yolo.yolo_track import YOLOTrack
 
 from layout_colorwidget import ColorLabel
 
-from PyQt6.QtCore import QSize, Qt,QUrl
+from PyQt6.QtCore import QSize, Qt, QUrl
 from PyQt6.QtGui import QAction
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
@@ -21,7 +21,6 @@ from PyQt6.QtWidgets import (
 )
 
 from layout_colorwidget import Color
-
 
 
 class VideoModelApp(QMainWindow):
@@ -34,7 +33,7 @@ class VideoModelApp(QMainWindow):
         self.active_layout = "home"
 
         self.model_path = "../experiments/model/sc_cnn_state_dict.pth"
-        self.model = SpermCountingCNN() 
+        self.model = SpermCountingCNN()
         self.load_model(self.model_path)
 
         self.video_path = "D:\\university\\2024\\BioMed Project\\Sperm-Analysis\\data\\shorter_2s.mp4"
@@ -55,7 +54,7 @@ class VideoModelApp(QMainWindow):
         # UI Elements - Home
         self.label = QLabel("Upload a video file:", self)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
+
         self.prediction_label = QLabel("Prediction will appear here", self)
         self.prediction_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -94,7 +93,7 @@ class VideoModelApp(QMainWindow):
         self.video_container.setLayout(video_layout)
 
         track_layout = self.get_layout("track")
-        
+
         self.track_container = QWidget()
         self.track_container.setLayout(track_layout)
         self.track_container.setHidden(True)
@@ -108,8 +107,6 @@ class VideoModelApp(QMainWindow):
         self.setCentralWidget(self.stack)
 
         self.yolo_track = YOLOTrack(self)
-
-
 
     def get_layout(self, layout_name: str):
         layout = QVBoxLayout()
@@ -145,10 +142,8 @@ class VideoModelApp(QMainWindow):
 
             self.stack.setCurrentWidget(self.home_container)
 
-
     def load_model(self, model_path: str):
         self.model.load_state_dict(torch.load(model_path))
-        
 
     def upload_video(self):
         file_dialog = QFileDialog()
@@ -184,15 +179,12 @@ class VideoModelApp(QMainWindow):
             self.stack.setCurrentWidget(self.track_container)
             self.yolo_track.yoloTrack(self.video_path)
 
-            
-
-
-    def get_prediction(self):        
-        if self.video_path is None: 
+    def get_prediction(self):
+        if self.video_path is None:
             QMessageBox.critical(self, "Error", "Please upload a video first")
         else:
             predicted_sperm_count = funct.get_prediction(self.video_path, self.temp_output, self.model)
-            self.prediction_label.setText(f"On video {self.video_path} predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
-            QMessageBox.information(self, "Success", f"Model ran successfully on the video and predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
-
-        
+            self.prediction_label.setText(
+                f"On video {self.video_path} predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
+            QMessageBox.information(self, "Success",
+                                    f"Model ran successfully on the video and predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")

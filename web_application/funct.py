@@ -1,7 +1,6 @@
 import os
 import shutil
 
-
 import cv2
 import pandas as pd
 from tqdm import tqdm
@@ -11,7 +10,6 @@ import torch
 
 from torchvision import transforms
 from PIL import Image
-
 
 
 def transform_image(frame):
@@ -52,7 +50,6 @@ def extract_frames(video_path, output_dir, frame_rate=1, get_first=True):
     cap = cv2.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-
     frame_interval = max(1, fps // frame_rate)
     frame_idx = 0
     extracted = False
@@ -80,7 +77,6 @@ def extract_frames(video_path, output_dir, frame_rate=1, get_first=True):
 
 
 def get_prediction(video_path: str, output_dir: str, model):
-
     extract_frames(video_path, output_dir, frame_rate=1, get_first=False)
 
     # Get all jpg files in the output_dir
@@ -97,8 +93,3 @@ def get_prediction(video_path: str, output_dir: str, model):
     shutil.rmtree(output_dir)
 
     return np.mean(outputs)
-
-
-
-
-

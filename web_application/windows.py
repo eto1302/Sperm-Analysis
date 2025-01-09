@@ -1,3 +1,7 @@
+import json
+import os
+from datetime import datetime
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,6 +10,7 @@ import sys
 
 from model import SpermCountingCNN
 import funct
+from log import log_prediction, LOG_FILE
 
 from yolo.yolo_track import YOLOTrack
 
@@ -17,7 +22,7 @@ from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, QVBoxLayout, QWidget,
-    QMessageBox, QStackedWidget, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
+    QMessageBox, QStackedWidget, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QDialog, QScrollArea, QFrame
 )
 
 from layout_colorwidget import Color
@@ -108,6 +113,11 @@ class VideoModelApp(QMainWindow):
 
         self.yolo_track = YOLOTrack(self)
 
+        # Logs
+        self.view_logs_button = QPushButton("View Prediction Logs", self)
+        self.view_logs_button.clicked.connect(self.view_logs)
+        home_layout.addWidget(self.view_logs_button)
+
     def get_layout(self, layout_name: str):
         layout = QVBoxLayout()
 
@@ -184,8 +194,12 @@ class VideoModelApp(QMainWindow):
         if self.video_path is None:
             QMessageBox.critical(self, "Error", "Please upload a video first")
         else:
+
             self.stack.setCurrentWidget(self.track_container)
-            self.yolo_track.yoloTrack(self.video_path)
+            motility_data = self.yolo_track.yoloTrack(self.video_path)
+
+            # Log the motility prediction
+            log_prediction(self.video_path, "motility", motility_data)
 
     def get_prediction(self):
         # Show confirmation dialog
@@ -196,7 +210,7 @@ class VideoModelApp(QMainWindow):
         if not proceed:
             return  # Cancel the action if the user selects "No"
 
-        if self.video_path is None:
+        if self.video_path is None or not os.path.isfile(self.video_path):
             QMessageBox.critical(self, "Error", "Please upload a video first")
         else:
             predicted_sperm_count = funct.get_prediction(self.video_path, self.temp_output, self.model)
@@ -204,6 +218,9 @@ class VideoModelApp(QMainWindow):
                 f"On video {self.video_path} predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
             QMessageBox.information(self, "Success",
                                     f"Model ran successfully on the video and predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
+
+            # Log the prediction
+            log_prediction(self.video_path, "sperm_count", predicted_sperm_count)
 
     def show_confirmation_dialog(self, title, message):
         confirmation = QMessageBox.question(
@@ -213,3 +230,76 @@ class VideoModelApp(QMainWindow):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         return confirmation == QMessageBox.StandardButton.Yes
+
+    def view_logs(self):
+        try:
+            with open(LOG_FILE, "r") as file:
+                logs = json.load(file)
+        except FileNotFoundError:
+            logs = []
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Error", "Log file is corrupted or contains invalid data.")
+            return
+
+        if not logs:
+            QMessageBox.information(self, "Prediction Logs", "No logs available.")
+            return
+
+        # Create the scrollable dialog
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Prediction Logs")
+        dialog.resize(600, 400)
+
+        layout = QVBoxLayout(dialog)
+
+        scroll_area = QScrollArea(dialog)
+        scroll_area.setWidgetResizable(True)
+
+        container_widget = QWidget()
+        container_layout = QVBoxLayout(container_widget)
+
+        # Format and style each log entry
+        for log in reversed(logs):
+            log_frame = QFrame()
+            log_frame.setFrameShape(QFrame.Shape.Box)
+            log_frame.setFrameShadow(QFrame.Shadow.Raised)
+            log_frame.setStyleSheet("background-color: #f9f9f9; border: 1px solid #ccc; margin: 5px; padding: 10px;")
+
+            log_layout = QVBoxLayout(log_frame)
+
+            # Format date
+            formatted_date = datetime.fromisoformat(log["timestamp"]).strftime("%d %B %Y, %H:%M:%S")
+            date_label = QLabel(f"<b>Date:</b> {formatted_date}")
+            date_label.setStyleSheet("color: #555; font-size: 12px;")
+
+            # Display video path
+            video_label = QLabel(f"<b>Video:</b> {log['video_path']}")
+            video_label.setStyleSheet("color: #333; font-size: 14px;")
+
+            # Display prediction type and value
+            if log["prediction_type"] == "motility":
+                motility = log["prediction_value"]
+                prediction_label = QLabel(
+                    f"<b>Prediction:</b> Motility<br>"
+                    f"  Total: {motility['total']}<br>"
+                    f"  Motile: {motility['motile']}<br>"
+                    f"  Progressive: {motility['progressive']}<br>"
+                    f"  Immotile: {motility['immotile']}"
+                )
+            else:
+                prediction_label = QLabel(f"<b>Prediction:</b> Sperm Count: {log['prediction_value']:.2f} (x10⁶)")
+            prediction_label.setStyleSheet("color: #444; font-size: 14px;")
+
+            # Add widgets to the log layout
+            log_layout.addWidget(date_label)
+            log_layout.addWidget(video_label)
+            log_layout.addWidget(prediction_label)
+
+            # Add the styled log frame to the container
+            container_layout.addWidget(log_frame)
+
+        # Add the container to the scroll area
+        scroll_area.setWidget(container_widget)
+        layout.addWidget(scroll_area)
+
+        dialog.exec()

@@ -180,3 +180,4 @@ data/
 
 # yolo 11 nano pretrained model
 yolo11n.pt
+web_application/predictions_log.json

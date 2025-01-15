@@ -22,7 +22,8 @@ from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, QVBoxLayout, QWidget,
-    QMessageBox, QStackedWidget, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QDialog, QScrollArea, QFrame
+    QMessageBox, QStackedWidget, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QDialog, QScrollArea, QFrame,
+    QDoubleSpinBox
 )
 
 from layout_colorwidget import Color
@@ -43,6 +44,16 @@ class VideoModelApp(QMainWindow):
 
         self.video_path = "D:\\university\\2024\\BioMed Project\\Sperm-Analysis\\data\\shorter_2s.mp4"
         self.temp_output = "temp_output"
+
+        # Sperm volume input element
+        self.volume_label = QLabel("Sperm Volume (ml):", self)
+        self.volume_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self.volume_input = QDoubleSpinBox(self)
+        self.volume_input.setDecimals(2)
+        self.volume_input.setRange(0.0, 100.0)
+        self.volume_input.setValue(0.0)
+        self.volume_input.setSuffix(" ml")
 
         # Media Player Elements
         self.media_player = QMediaPlayer()
@@ -117,6 +128,10 @@ class VideoModelApp(QMainWindow):
         self.view_logs_button = QPushButton("View Prediction Logs", self)
         self.view_logs_button.clicked.connect(self.view_logs)
         home_layout.addWidget(self.view_logs_button)
+        home_layout.addWidget(self.volume_label)
+        home_layout.addWidget(self.volume_input)
+
+
 
     def get_layout(self, layout_name: str):
         layout = QVBoxLayout()

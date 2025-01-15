@@ -1,10 +1,12 @@
 import json
 from datetime import datetime
 
+from PyQt6.QtWidgets import QMessageBox, QDialog, QVBoxLayout, QScrollArea, QWidget, QFrame, QLabel
+
 LOG_FILE = "predictions_log.json"
 
 
-def log_prediction(video_path, prediction_type, prediction_value):
+def log_prediction(video_path, prediction_type, prediction_value, sperm_volume):
     """
     Logs a prediction result to a JSON file.
     
@@ -13,12 +15,14 @@ def log_prediction(video_path, prediction_type, prediction_value):
     :param prediction_value: 
         - For "motility" predictions, this should be a dictionary with keys: "total", "motile", "progressive", and "immotile".
         - For other types, this should be a simple value corresponding to the prediction.
+    :param sperm_volume: The volume of the sperm inputted by the user.
     :return: None
     """
     # Create a log entry
     log_entry = {
         "timestamp": datetime.now().isoformat(),
         "video_path": video_path,
+        "sperm_volume": sperm_volume,
         "prediction_type": prediction_type
     }
 
@@ -46,3 +50,5 @@ def log_prediction(video_path, prediction_type, prediction_value):
     # Write the updated log back to the file
     with open(LOG_FILE, "w") as file:
         json.dump(logs, file, indent=4)
+
+

@@ -22,7 +22,8 @@ from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, QVBoxLayout, QWidget,
-    QMessageBox, QStackedWidget, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QDialog, QScrollArea, QFrame
+    QMessageBox, QStackedWidget, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QDialog, QScrollArea, QFrame,
+    QDoubleSpinBox
 )
 
 from layout_colorwidget import Color
@@ -43,6 +44,16 @@ class VideoModelApp(QMainWindow):
 
         self.video_path = "D:\\university\\2024\\BioMed Project\\Sperm-Analysis\\data\\shorter_2s.mp4"
         self.temp_output = "temp_output"
+
+        # Sperm volume input element
+        self.volume_label = QLabel("Sperm Volume (ml):", self)
+        self.volume_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self.volume_input = QDoubleSpinBox(self)
+        self.volume_input.setDecimals(2)
+        self.volume_input.setRange(0.0, 100.0)
+        self.volume_input.setValue(0.0)
+        self.volume_input.setSuffix(" ml")
 
         # Media Player Elements
         self.media_player = QMediaPlayer()
@@ -117,6 +128,8 @@ class VideoModelApp(QMainWindow):
         self.view_logs_button = QPushButton("View Prediction Logs", self)
         self.view_logs_button.clicked.connect(self.view_logs)
         home_layout.addWidget(self.view_logs_button)
+        home_layout.addWidget(self.volume_label)
+        home_layout.addWidget(self.volume_input)
 
     def get_layout(self, layout_name: str):
         layout = QVBoxLayout()
@@ -197,9 +210,10 @@ class VideoModelApp(QMainWindow):
 
             self.stack.setCurrentWidget(self.track_container)
             motility_data = self.yolo_track.yoloTrack(self.video_path)
+            sperm_volume = self.volume_input.value()
 
             # Log the motility prediction
-            log_prediction(self.video_path, "motility", motility_data)
+            log_prediction(self.video_path, "motility", motility_data, sperm_volume)
 
     def get_prediction(self):
         # Show confirmation dialog
@@ -214,13 +228,14 @@ class VideoModelApp(QMainWindow):
             QMessageBox.critical(self, "Error", "Please upload a video first")
         else:
             predicted_sperm_count = funct.get_prediction(self.video_path, self.temp_output, self.model)
+            sperm_volume = self.volume_input.value()
             self.prediction_label.setText(
                 f"On video {self.video_path} predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
             QMessageBox.information(self, "Success",
                                     f"Model ran successfully on the video and predicted {predicted_sperm_count:.2f} (x10⁶) sperm count")
 
             # Log the prediction
-            log_prediction(self.video_path, "sperm_count", predicted_sperm_count)
+            log_prediction(self.video_path, "sperm_count", predicted_sperm_count, sperm_volume)
 
     def show_confirmation_dialog(self, title, message):
         confirmation = QMessageBox.question(
@@ -276,6 +291,9 @@ class VideoModelApp(QMainWindow):
             video_label = QLabel(f"<b>Video:</b> {log['video_path']}")
             video_label.setStyleSheet("color: #333; font-size: 14px;")
 
+            volume_label = QLabel(f"<b>Sperm Volume:</b> {log['sperm_volume']} ml")
+            volume_label.setStyleSheet("color: #333; font-size: 14px;")
+
             # Display prediction type and value
             if log["prediction_type"] == "motility":
                 motility = log["prediction_value"]
@@ -293,6 +311,7 @@ class VideoModelApp(QMainWindow):
             # Add widgets to the log layout
             log_layout.addWidget(date_label)
             log_layout.addWidget(video_label)
+            log_layout.addWidget(volume_label)
             log_layout.addWidget(prediction_label)
 
             # Add the styled log frame to the container

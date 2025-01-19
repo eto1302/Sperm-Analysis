@@ -39,6 +39,7 @@ class YOLOTrack:
         frame_delay = int(1000 / DESIRED_FPS)
 
         trajectories = {}
+        frames = 0
 
         while True:
             ret, frame = self.cap.read()
@@ -73,10 +74,11 @@ class YOLOTrack:
                               (0, 0, 255), 2)
                 cv2.putText(frame, f"{str(tracking_id)}", (corrected_bbox[0], corrected_bbox[1] - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
+            frames += 1
             end_time = time.perf_counter()
             fps = 1 / (end_time - start_time)
             print(f"Current fps: {fps}")
+            print(f"Current frame: {frames}")
 
             # Convert frame to QImage and display it in the Qt container
             # Render the frame in the track_container
@@ -106,6 +108,7 @@ class YOLOTrack:
         print(f"Progressive: {motility_data['progressive']}")
         print(f"Immotile: {motility_data['immotile']}")
 
+        print("frames ", frames)
         return motility_data
 
     def write_motility_statistics(self, motility_data, motility_label):

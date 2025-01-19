@@ -3,15 +3,15 @@ from ultralytics import YOLO
 
 class SpermYOLODetector:
     def __init__(self, model_path, confidence):
-        self.model = YOLO(model_path)
+        self.model = YOLO(model_path, verbose=False)
         self.class_list = ['0', 'Sperms']
         self.confidence = confidence
 
     def detect(self, image):
-        results = self.model.predict(image, conf=self.confidence)
+        results = self.model.predict(image, conf=self.confidence, verbose=False)
         result = results[0]
 
-        print(results)
+        # print(results)
 
         detections = self.make_detections(result)
 

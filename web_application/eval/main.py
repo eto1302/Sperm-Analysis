@@ -1,10 +1,13 @@
 import os
 
 import pandas as pd
+import matplotlib
+from matplotlib import pyplot as plt
 from tqdm import tqdm
-
 from evaluator import YOLOTrackEvaluator
 from yolo.yolo_track import MODEL_PATH
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from scipy.stats import pearsonr, spearmanr
 
 
 def get_video_paths(root_folder: str) -> list[str]:
@@ -60,8 +63,88 @@ def correct_data(path_to_csv):
     df.to_csv("corrected_results.csv", float_format='%.2f')
 
 
+def statistics(path_to_pred, path_to_ground_truth):
+    matplotlib.use('TkAgg')
+    predictions = pd.read_csv(path_to_pred)
+    ground_truth = pd.read_csv(path_to_ground_truth)
+
+    merged_data = pd.merge(predictions, ground_truth, on="ID", suffixes=("_pred", "_gt"))
+
+    assert len(predictions) == len(ground_truth)
+    assert "Progressive motility (%)_pred" in merged_data.columns
+    assert "Progressive motility (%)_gt" in merged_data.columns
+    assert "Non progressive sperm motility (%)_pred" in merged_data.columns
+    assert "Non progressive sperm motility (%)_gt" in merged_data.columns
+    assert "Immotile sperm (%)_pred" in merged_data.columns
+    assert "Immotile sperm (%)_gt" in merged_data.columns
+
+    metrics = {}
+
+    columns_to_evaluate = ["Progressive motility (%)", "Non progressive sperm motility (%)", "Immotile sperm (%)"]
+
+    for column in columns_to_evaluate:
+        pred_col = f"{column}_pred"
+        gt_col = f"{column}_gt"
+
+        # Compute errors
+        mae = mean_absolute_error(merged_data[gt_col], merged_data[pred_col])
+        mse = mean_squared_error(merged_data[gt_col], merged_data[pred_col])
+        corr_pearson, _ = pearsonr(merged_data[gt_col], merged_data[pred_col])
+        corr_spearman, _ = spearmanr(merged_data[gt_col], merged_data[pred_col])
+
+        # Store results
+        metrics[column] = {
+            "MAE": mae,
+            "MSE": mse,
+            "Pearson Correlation": corr_pearson,
+            "Spearman Correlation": corr_spearman
+        }
+
+    for metric, values in metrics.items():
+        print(f"\nMetrics for {metric}:")
+        for k, v in values.items():
+            print(f"{k}: {v:.2f}")
+
+    for column in columns_to_evaluate:
+        pred_col = f"{column}_pred"
+        gt_col = f"{column}_gt"
+
+        plt.figure(figsize=(8, 6))
+        plt.scatter(merged_data[gt_col], merged_data[pred_col], alpha=0.7, label="Predictions")
+        plt.plot([merged_data[gt_col].min(), merged_data[gt_col].max()],
+                 [merged_data[gt_col].min(), merged_data[gt_col].max()],
+                 color="red", linestyle="--", label="Ideal")
+        plt.title(f"Predicted vs. Ground Truth: {column}")
+        plt.xlabel("Ground Truth")
+        plt.ylabel("Predicted")
+        plt.legend()
+        plt.grid()
+        plt.show()
+
+    mae_data = []
+    for column in columns_to_evaluate:
+        pred_col = f"{column}_pred"
+        gt_col = f"{column}_gt"
+        mae = abs(merged_data[gt_col] - merged_data[pred_col])
+        mae_data.append(mae)
+
+    boxplot_data = pd.DataFrame({
+        "Metric": columns_to_evaluate,
+        "MAE": mae_data
+    }).explode("MAE")
+
+    plt.figure(figsize=(12, 6))
+    boxplot_data.boxplot(by="Metric", column="MAE", grid=False)
+    plt.title("MAE Distribution by Metric")
+    plt.suptitle("")
+    plt.xlabel("Metric")
+    plt.ylabel("Mean Absolute Error (MAE)")
+    plt.grid(axis="y")
+    plt.show()
+
+
 def main():
-    
+    statistics('data_csv/corrected_results.csv', 'data_csv/ground_truth.csv')
 
 
 if __name__ == "__main__":

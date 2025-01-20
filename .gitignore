@@ -164,7 +164,7 @@ cython_debug/
 #.idea/
 
 # csv files
-**.csv
+# **.csv
 
 visem-qc/
 visem-dataset/
@@ -181,3 +181,10 @@ data/
 # yolo 11 nano pretrained model
 yolo11n.pt
 web_application/predictions_log.json
+web_application/.idea/workspace.xml
+web_application/.idea/web_application.iml
+web_application/.idea/vcs.xml
+web_application/.idea/modules.xml
+web_application/.idea/misc.xml
+web_application/.idea/inspectionProfiles/Project_Default.xml
+web_application/.idea/inspectionProfiles/profiles_settings.xml

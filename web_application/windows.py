@@ -2,31 +2,20 @@ import json
 import os
 from datetime import datetime
 
-import numpy as np
 import torch
-import torch.nn as nn
-
-import sys
-
-from model import SpermCountingCNN
-import funct
-from log import log_prediction, LOG_FILE
-
-from yolo.yolo_track import YOLOTrack
-
-from layout_colorwidget import ColorLabel
-
-from PyQt6.QtCore import QSize, Qt, QUrl
-from PyQt6.QtGui import QAction
+from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, QVBoxLayout, QWidget,
-    QMessageBox, QStackedWidget, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QDialog, QScrollArea, QFrame,
+    QMainWindow, QPushButton, QLabel, QFileDialog, QVBoxLayout, QWidget,
+    QMessageBox, QStackedWidget, QGraphicsView, QGraphicsScene, QDialog, QScrollArea, QFrame,
     QDoubleSpinBox
 )
 
-from layout_colorwidget import Color
+import funct
+from log import log_prediction, LOG_FILE
+from model import SpermCountingCNN
+from yolo.yolo_track import YOLOTrack
 
 
 class VideoModelApp(QMainWindow):

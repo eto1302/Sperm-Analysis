@@ -1,0 +1,5 @@
+ID = name of the video
+Motile (%) = % of the total sperm cells that are motile. It includes progressive and non progressive motility
+Progressive (%) = % of the total sperm cells that are progressively motile
+Immotile (%) = % of the total sperm cells that are immotile
+Motile + Immotile  = 100%

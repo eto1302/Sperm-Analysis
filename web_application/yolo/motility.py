@@ -16,7 +16,6 @@ def calculate_motility_metrics(trajectories):
     for track_id, trajectory in trajectories.items():
         motility_data["total"] += 1  # Increment total sperm count
 
-
         if len(trajectory) < 2:
             motility_data["immotile"] += 1
             continue
@@ -26,7 +25,7 @@ def calculate_motility_metrics(trajectories):
 
         # Total displacement is the Euclidean distance between the start and end points 
         total_displacement = np.linalg.norm(np.array(trajectory[-1]) - np.array(trajectory[0]))
-        
+
         path_length = np.sum(displacements)
         straightness = total_displacement / path_length if path_length > 0 else 0
 

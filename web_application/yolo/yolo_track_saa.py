@@ -17,20 +17,21 @@ DESIRED_FPS = 3  # Slow down to 5 frames per second
 
 
 def resize_with_padding(image, target_size):
-    h, w,_ = image.shape[:3]
+    h, w, _ = image.shape[:3]
     scale = min(target_size / w, target_size / h)
     new_w = int(w * scale)
     new_h = int(h * scale)
 
     resized_image = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
-    
+
     pad_w = (target_size - new_w) // 2
     pad_h = (target_size - new_h) // 2
 
     padded_image = cv2.copyMakeBorder(resized_image, pad_h, target_size - new_h - pad_h,
-                                    pad_w, target_size - new_w - pad_w, cv2.BORDER_CONSTANT, value=[128, 128, 128])
+                                      pad_w, target_size - new_w - pad_w, cv2.BORDER_CONSTANT, value=[128, 128, 128])
 
     return padded_image, scale, pad_w, pad_h
+
 
 def correct_bbox(bbox, scale, pad_w, pad_h, original_w, original_h):
     # Correct bounding box by reversing the scaling and padding
@@ -46,6 +47,7 @@ def correct_bbox(bbox, scale, pad_w, pad_h, original_w, original_h):
     y2 = max(0, min(original_h, y2))
 
     return [int(x1), int(y1), int(x2), int(y2)]
+
 
 def main():
     detector = SpermYOLODetector(model_path=MODEL_PATH, confidence=0.1)
@@ -91,8 +93,9 @@ def main():
             trajectories[tracking_id].append(center)
 
             # Draw the bounding box and tracking ID on the original frame
-            cv2.rectangle(frame, (corrected_bbox[0], corrected_bbox[1]), (corrected_bbox[2], corrected_bbox[3]), (0, 0, 255), 2)
-            cv2.putText(frame, f"{str(tracking_id)}", (corrected_bbox[0], corrected_bbox[1] - 10), 
+            cv2.rectangle(frame, (corrected_bbox[0], corrected_bbox[1]), (corrected_bbox[2], corrected_bbox[3]),
+                          (0, 0, 255), 2)
+            cv2.putText(frame, f"{str(tracking_id)}", (corrected_bbox[0], corrected_bbox[1] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         end_time = time.perf_counter()

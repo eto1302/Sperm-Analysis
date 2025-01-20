@@ -49,8 +49,19 @@ def process_videos(root_folder: str) -> None:
     predicted_df.to_csv("predicted_results.csv")
 
 
+def correct_data(path_to_csv):
+    df = pd.read_csv(path_to_csv)
+    df.rename(columns={'Motile (%)': 'Total Motile (%)', 'Progressive (%)': 'Progressive motility (%)',
+                       'Immotile (%)': 'Immotile sperm (%)'}, inplace=True)
+    df['Non progressive sperm motility (%)'] = df['Total Motile (%)'] - df['Progressive motility (%)']
+    del df['Index']
+    df = df[['ID', 'Total Motile (%)', 'Progressive motility (%)', 'Non progressive sperm motility (%)',
+             'Immotile sperm (%)']]
+    df.to_csv("corrected_results.csv", float_format='%.2f')
+
+
 def main():
-    pass
+    
 
 
 if __name__ == "__main__":
